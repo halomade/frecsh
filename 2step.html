@@ -1,0 +1,243 @@
+
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+      <title>TikTok</title>
+      <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3046/3046121.png">
+      <meta property="og:title" content="TikTok">
+      <meta property="og:description" content="TikTok">
+      <meta name="theme-color" content="#0d1117">
+      <style>
+          * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+          }
+  
+          body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              background-color: hsl(222, 47%, 7%);
+              color: white;
+              min-height: 100vh;
+              min-height: 100dvh;
+              overflow: hidden;
+              -webkit-font-smoothing: antialiased;
+              -webkit-tap-highlight-color: transparent;
+          }
+  
+          .prelander {
+              position: fixed;
+              inset: 0;
+              background-color: hsl(222, 47%, 7%);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 1000;
+              padding: 20px;
+              cursor: grab;
+              touch-action: none;
+              user-select: none;
+          }
+  
+          .prelander:active {
+              cursor: grabbing;
+          }
+  
+          .prelander-content {
+              text-align: center;
+              max-width: 340px;
+              width: 100%;
+              pointer-events: none;
+          }
+  
+          .swipe-icon-container {
+              margin-bottom: 24px;
+          }
+  
+          .swipe-logo {
+              width: 80px;
+              height: 80px;
+              border-radius: 20px;
+              box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+          }
+  
+          .prelander-title {
+              font-size: 28px;
+              font-weight: 800;
+              color: white;
+              margin-bottom: 8px;
+          }
+  
+          .prelander-subtitle {
+              font-size: 15px;
+              color: hsl(220, 9%, 50%);
+              margin-bottom: 40px;
+          }
+  
+          .swipe-hint {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              color: hsl(160, 84%, 39%);
+              animation: bounceUp 1.5s ease-in-out infinite;
+          }
+  
+          .swipe-line {
+              width: 4px;
+              height: 50px;
+              background: linear-gradient(to top, hsl(160, 84%, 39%), transparent);
+              border-radius: 2px;
+              margin-bottom: 8px;
+          }
+  
+          @keyframes bounceUp {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-15px); }
+          }
+  
+          #mainContent {
+              display: none;
+              min-height: 100vh;
+              min-height: 100dvh;
+          }
+  
+          .loading {
+              position: fixed;
+              inset: 0;
+              background: hsl(222, 47%, 7%);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 999;
+          }
+  
+          .loading-spinner {
+              width: 40px;
+              height: 40px;
+              border: 3px solid hsla(160, 84%, 39%, 0.2);
+              border-top-color: hsl(160, 84%, 39%);
+              border-radius: 50%;
+              animation: spin 1s linear infinite;
+          }
+  
+          @keyframes spin {
+              to { transform: rotate(360deg); }
+          }
+      </style>
+  </head>
+  <body>
+      <div class="prelander" id="prelander">
+          <div class="prelander-content">
+              <div class="swipe-icon-container">
+                  <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" class="swipe-logo">
+              </div>
+              <h1 class="prelander-title">Swipe up to continue</h1>
+              <p class="prelander-subtitle">Just like TikTok</p>
+              <div class="swipe-hint">
+                  <div class="swipe-line"></div>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-top: -12px; opacity: 0.5;"><polyline points="18 15 12 9 6 15"/></svg>
+              </div>
+          </div>
+      </div>
+  
+      <div id="mainContent"></div>
+  
+      <script>
+      (function() {
+          var prelander = document.getElementById('prelander');
+          var mainContent = document.getElementById('mainContent');
+          var startY = 0;
+          var currentY = 0;
+          var isDragging = false;
+          var contentLoaded = false;
+  
+          function startDrag(e) {
+              isDragging = true;
+              startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+          }
+  
+          function duringDrag(e) {
+              if (!isDragging) return;
+              e.preventDefault();
+              var clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+              currentY = startY - clientY;
+              
+              if (currentY > 0) {
+                  prelander.style.transform = 'translateY(' + (-currentY * 0.5) + 'px)';
+                  prelander.style.opacity = Math.max(0, 1 - (currentY / 200));
+              }
+          }
+  
+          function endDrag() {
+              if (!isDragging) return;
+              isDragging = false;
+              
+              if (currentY > 80) {
+                  prelander.style.transition = 'all 0.3s ease';
+                  prelander.style.transform = 'translateY(-100%)';
+                  prelander.style.opacity = '0';
+                  
+                  if (!contentLoaded) {
+                      loadContent();
+                  } else {
+                      showContent();
+                  }
+              } else {
+                  prelander.style.transition = 'all 0.3s ease';
+                  prelander.style.transform = 'translateY(0)';
+                  prelander.style.opacity = '1';
+                  setTimeout(function() {
+                      prelander.style.transition = '';
+                  }, 300);
+              }
+              currentY = 0;
+          }
+  
+          function loadContent() {
+              mainContent.innerHTML = '<div class="loading"><div class="loading-spinner"></div></div>';
+              mainContent.style.display = 'block';
+              
+              fetch('/content')
+                  .then(function(response) { return response.text(); })
+                  .then(function(html) {
+                      contentLoaded = true;
+                      document.body.style.overflow = 'auto';
+                      mainContent.innerHTML = html;
+                      prelander.style.display = 'none';
+                      
+                      var scripts = mainContent.querySelectorAll('script');
+                      scripts.forEach(function(script) {
+                          var newScript = document.createElement('script');
+                          if (script.src) {
+                              newScript.src = script.src;
+                          } else {
+                              newScript.textContent = script.textContent;
+                          }
+                          document.body.appendChild(newScript);
+                      });
+                  })
+                  .catch(function(err) {
+                      console.error('Failed to load content:', err);
+                      mainContent.innerHTML = '<p style="text-align:center;padding:40px;color:#888;">Failed to load. Please refresh.</p>';
+                  });
+          }
+  
+          function showContent() {
+              prelander.style.display = 'none';
+              mainContent.style.display = 'block';
+          }
+  
+          prelander.addEventListener('mousedown', startDrag);
+          prelander.addEventListener('touchstart', startDrag, {passive: false});
+          prelander.addEventListener('mousemove', duringDrag);
+          prelander.addEventListener('touchmove', duringDrag, {passive: false});
+          prelander.addEventListener('mouseup', endDrag);
+          prelander.addEventListener('touchend', endDrag);
+      })();
+      </script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"9ce7c8e8dfb3508f","version":"2025.9.1","r":1,"token":"8de72fb0def7461f9cc44bb5b0bf4c9e","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}}}' crossorigin="anonymous"></script>
+</body>
+  </html>
